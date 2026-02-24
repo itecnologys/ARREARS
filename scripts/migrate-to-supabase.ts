@@ -1,5 +1,6 @@
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 import path from "node:path";
 import fs from "node:fs";
 import * as XLSX from "xlsx";
@@ -7,16 +8,22 @@ import { createClient } from '@supabase/supabase-js';
 
 // Configuração do Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; // Usar a chave de serviço (service_role) seria melhor para ignorar RLS, mas vamos tentar com a anon por enquanto ou pedir pro usuário configurar.
-// Nota: Para inserção em massa, idealmente usaríamos a SERVICE_ROLE_KEY, mas ela não deve ser exposta no client-side.
-// Como este é um script de backend (node), o usuário deve colocar a SERVICE_ROLE_KEY no .env.local se tiver RLS ativado que bloqueie anon.
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('Erro: NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY devem estar definidos no .env.local');
+  console.error('Erro: NEXT_PUBLIC_SUPABASE_URL e (SUPABASE_SERVICE_ROLE_KEY ou NEXT_PUBLIC_SUPABASE_ANON_KEY) devem estar definidos no .env.local');
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+console.log(`Conectando ao Supabase em: ${supabaseUrl}`);
+console.log(`Usando chave: ${process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SERVICE_ROLE (Secret)' : 'ANON (Public)'}`);
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+  }
+});
 
 // --- Lógica de Leitura de Arquivos (Copiada de build-yearly-data.ts) ---
 

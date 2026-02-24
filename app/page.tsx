@@ -1,37 +1,38 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MonthlyArrearsRecord,
   TransactionSaCash,
   sampleMonthlyArrears,
 } from "./rent-model";
-import monthlyArrearsData from "../data/monthly-arrears.json";
-import transactionsSaCashData from "../data/transactions-sa-cash-agg.json";
+// import monthlyArrearsData from "../data/monthly-arrears.json";
+// import transactionsSaCashData from "../data/transactions-sa-cash-agg.json";
+import { fetchMonthlyArrearsFromSupabase, fetchTransactionsFromSupabase } from "./actions";
 
-const jsonRecords = (monthlyArrearsData as MonthlyArrearsRecord[]) ?? [];
-const baseRecords: MonthlyArrearsRecord[] =
-  Array.isArray(jsonRecords) && jsonRecords.length > 0
-    ? jsonRecords
-    : sampleMonthlyArrears;
+// const jsonRecords = (monthlyArrearsData as MonthlyArrearsRecord[]) ?? [];
+// const baseRecords: MonthlyArrearsRecord[] =
+//   Array.isArray(jsonRecords) && jsonRecords.length > 0
+//     ? jsonRecords
+//     : sampleMonthlyArrears;
 
-const allRecords: MonthlyArrearsRecord[] = baseRecords;
+// const allRecords: MonthlyArrearsRecord[] = baseRecords;
 
-const yearValues = Array.from(
-  new Set(allRecords.map((r) => r.periodMonth.slice(0, 4))),
-).sort();
-const numberYears = yearValues.map((y) => Number(y));
+// const yearValues = Array.from(
+//   new Set(allRecords.map((r) => r.periodMonth.slice(0, 4))),
+// ).sort();
+// const numberYears = yearValues.map((y) => Number(y));
 
-const allTransactions: TransactionSaCash[] = Array.isArray(
-  transactionsSaCashData as unknown as TransactionSaCash[],
-)
-  ? ((transactionsSaCashData as unknown as TransactionSaCash[]) ?? [])
-  : [];
+// const allTransactions: TransactionSaCash[] = Array.isArray(
+//   transactionsSaCashData as unknown as TransactionSaCash[],
+// )
+//   ? ((transactionsSaCashData as unknown as TransactionSaCash[]) ?? [])
+//   : [];
 
-function getMonthsForYear(year: number): string[] {
+function getMonthsForYear(year: number, records: MonthlyArrearsRecord[]): string[] {
   return Array.from(
     new Set(
-      allRecords
+      records
         .filter((r) => r.periodMonth.startsWith(String(year)))
         .map((r) => r.periodMonth),
     ),
@@ -59,20 +60,67 @@ function monthLabel(code: string): string {
 }
 
 export default function Home() {
-  const [selectedYear, setSelectedYear] = useState<number>(
-    numberYears[0] ?? 2024,
-  );
-  const [selectedMonth, setSelectedMonth] = useState<string>(() => {
-    const initialYear = numberYears[0];
-    if (!initialYear) return "";
-    const months = getMonthsForYear(initialYear);
-    return months[0] ?? "";
-  });
+  const [allRecords, setAllRecords] = useState<MonthlyArrearsRecord[]>([]);
+  const [allTransactions, setAllTransactions] = useState<TransactionSaCash[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+        try {
+            const records = await fetchMonthlyArrearsFromSupabase();
+            const transactions = await fetchTransactionsFromSupabase();
+            
+            if (records.length > 0) {
+                setAllRecords(records);
+            } else {
+                setAllRecords(sampleMonthlyArrears); // Fallback se DB vazio
+            }
+            setAllTransactions(transactions);
+        } catch (error) {
+            console.error("Failed to load data", error);
+            setAllRecords(sampleMonthlyArrears);
+        } finally {
+            setLoading(false);
+        }
+    }
+    loadData();
+  }, []);
+
+  const yearValues = Array.from(
+    new Set(allRecords.map((r) => r.periodMonth.slice(0, 4))),
+  ).sort();
+  const numberYears = yearValues.map((y) => Number(y));
+
+  const [selectedYear, setSelectedYear] = useState<number>(2024);
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
+
+  // Update defaults when data loads
+  useEffect(() => {
+    if (numberYears.length > 0 && !numberYears.includes(selectedYear)) {
+        setSelectedYear(numberYears[0]);
+    }
+  }, [numberYears, selectedYear]);
+
+  useEffect(() => {
+     if (selectedYear) {
+         const months = getMonthsForYear(selectedYear, allRecords);
+         if (months.length > 0 && !months.includes(selectedMonth)) {
+             setSelectedMonth(months[0]);
+         } else if (months.length > 0 && selectedMonth === "") {
+             setSelectedMonth(months[0]);
+         }
+     }
+  }, [selectedYear, allRecords, selectedMonth]);
+
   const [auditTarget, setAuditTarget] = useState<MonthlyArrearsRecord | null>(
     null,
   );
 
-  const monthsForYear = getMonthsForYear(selectedYear);
+  if (loading) {
+      return <div className="p-8">Carregando dados do Supabase...</div>;
+  }
+
+  const monthsForYear = getMonthsForYear(selectedYear, allRecords);
 
   const recordsForMonth = allRecords.filter(
     (r) => r.periodMonth === selectedMonth,
