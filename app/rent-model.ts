@@ -53,6 +53,11 @@ export interface TransactionSaCash {
   amount: number;
 }
 
+export interface Tenant {
+  tenantName: string;
+  roomCode: string;
+  staffName: string;
+}
 
 export const sampleMonthlyArrears: MonthlyArrearsRecord[] = [
   {

@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
-import { MonthlyArrearsRecord, MonthlyAudit, TransactionSaCash } from './rent-model';
+import { MonthlyArrearsRecord, MonthlyAudit, TransactionSaCash, Tenant } from './rent-model';
 
 // Definição dos tipos do banco de dados (aproximado)
 interface PaymentRow {
@@ -278,4 +278,42 @@ export async function fetchTransactionsFromSupabase(year?: number): Promise<Tran
         details: r.details,
         amount: r.amount
     }));
+}
+
+export async function fetchTenants(): Promise<Tenant[]> {
+  const allTenants: Tenant[] = [];
+  const uniqueKeys = new Set<string>();
+  let from = 0;
+  
+  while (true) {
+    const { data, error } = await supabase
+      .from('payments')
+      .select('tenant_name, room_code, staff_name')
+      .range(from, from + PAGE_SIZE - 1);
+      
+    if (error) {
+      console.error('Error fetching tenants:', error);
+      break;
+    }
+
+    if (!data || data.length === 0) break;
+    
+    data.forEach((row: any) => {
+      const key = `${row.tenant_name}|${row.room_code}`;
+      if (!uniqueKeys.has(key)) {
+        uniqueKeys.add(key);
+        allTenants.push({
+          tenantName: row.tenant_name,
+          roomCode: row.room_code,
+          staffName: row.staff_name || 'Unassigned'
+        });
+      }
+    });
+
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+
+  // Sort by name
+  return allTenants.sort((a, b) => a.tenantName.localeCompare(b.tenantName));
 }
