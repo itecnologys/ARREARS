@@ -12,8 +12,11 @@ export interface MonthlyArrearsRecord {
   carriedOverFromPreviousMonthAmount: number;
   monthTotalPaidAmount: number;
   monthArrearsAmount: number;
+  monthSurplusAmount: number;
+  previousBalanceAmount: number;
   yearArrearsAmount: number;
   currentArrearsAmount: number;
+  currentSurplusAmount: number;
   periodMonth: string;
   snapshotDate: string;
   audit?: MonthlyAudit;
@@ -54,9 +57,33 @@ export interface TransactionSaCash {
 }
 
 export interface Tenant {
+  id?: string;
+  sageId: string;
   tenantName: string;
   roomCode: string;
   staffName: string;
+  weeklyRent: number;
+  startDate?: string;
+  endDate?: string;
+  status: 'active' | 'inactive';
+  absentPeriods?: AbsentPeriod[];
+  rentHistory?: RentHistory[];
+}
+
+export interface AbsentPeriod {
+  id?: string;
+  tenantId?: string;
+  startDate: string;
+  endDate: string;
+  reason: 'Hospital' | 'Respite' | 'Custody' | 'Travel' | 'Other';
+  notes?: string;
+}
+
+export interface RentHistory {
+  id?: string;
+  tenantId?: string;
+  weeklyRent: number;
+  effectiveDate: string;
 }
 
 export const sampleMonthlyArrears: MonthlyArrearsRecord[] = [
@@ -74,8 +101,11 @@ export const sampleMonthlyArrears: MonthlyArrearsRecord[] = [
     carriedOverFromPreviousMonthAmount: 0,
     monthTotalPaidAmount: 255.0,
     monthArrearsAmount: 170.0,
+    monthSurplusAmount: 0,
+    previousBalanceAmount: 0,
     yearArrearsAmount: 0,
     currentArrearsAmount: 0,
+    currentSurplusAmount: 0,
     periodMonth: "2026-01",
     snapshotDate: "2026-01-01",
   },
@@ -93,8 +123,11 @@ export const sampleMonthlyArrears: MonthlyArrearsRecord[] = [
     carriedOverFromPreviousMonthAmount: 0,
     monthTotalPaidAmount: 100.0,
     monthArrearsAmount: 105.0,
+    monthSurplusAmount: 0,
+    previousBalanceAmount: 0,
     yearArrearsAmount: 0,
     currentArrearsAmount: 0,
+    currentSurplusAmount: 0,
     periodMonth: "2026-01",
     snapshotDate: "2026-01-01",
   },
@@ -112,8 +145,11 @@ export const sampleMonthlyArrears: MonthlyArrearsRecord[] = [
     carriedOverFromPreviousMonthAmount: 105.0,
     monthTotalPaidAmount: 70.0,
     monthArrearsAmount: 105.0,
+    monthSurplusAmount: 0,
+    previousBalanceAmount: 0,
     yearArrearsAmount: 0,
     currentArrearsAmount: 0,
+    currentSurplusAmount: 0,
     periodMonth: "2026-01",
     snapshotDate: "2026-01-01",
   },

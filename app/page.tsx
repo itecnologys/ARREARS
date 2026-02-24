@@ -249,8 +249,11 @@ export default function Home() {
                  <Th>Room / Unit</Th>
                  <Th>Status</Th>
                  <Th className="text-right">Rent Amount</Th>
+                 <Th className="text-right">Prev Balance</Th>
                  <Th className="text-right">Paid</Th>
-                 <Th className="text-right">Arrears</Th>
+                 <Th className="text-right">Month Arrears</Th>
+                 <Th className="text-right">Month Surplus</Th>
+                 <Th className="text-right">Current Balance</Th>
                  <Th className="text-right">Actions</Th>
                </tr>
              </thead>
@@ -294,13 +297,33 @@ export default function Home() {
                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-zinc-600">
                                 € {r.weeklyRentAmount.toFixed(2)}/wk
                              </td>
+                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <span className={r.previousBalanceAmount > 0 ? 'text-emerald-600' : (r.previousBalanceAmount < 0 ? 'text-red-600' : 'text-zinc-400')}>
+                                    € {Math.abs(r.previousBalanceAmount).toFixed(2)}
+                                    {r.previousBalanceAmount > 0 ? ' Cr' : (r.previousBalanceAmount < 0 ? ' Dr' : '')}
+                                </span>
+                             </td>
                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-zinc-900">
                                 € {r.monthTotalPaidAmount.toFixed(2)}
                              </td>
                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold">
-                                <span className={isOverdue ? 'text-red-600' : 'text-emerald-600'}>
+                                <span className={r.monthArrearsAmount > 0 ? 'text-red-600' : 'text-zinc-400'}>
                                     € {r.monthArrearsAmount.toFixed(2)}
                                 </span>
+                             </td>
+                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold">
+                                <span className={r.monthSurplusAmount > 0 ? 'text-emerald-600' : 'text-zinc-400'}>
+                                    € {r.monthSurplusAmount.toFixed(2)}
+                                </span>
+                             </td>
+                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold">
+                                 {r.currentSurplusAmount > 0 ? (
+                                     <span className="text-emerald-600">€ {r.currentSurplusAmount.toFixed(2)} Cr</span>
+                                 ) : r.currentArrearsAmount > 0 ? (
+                                     <span className="text-red-600">€ {r.currentArrearsAmount.toFixed(2)} Dr</span>
+                                 ) : (
+                                     <span className="text-zinc-400">-</span>
+                                 )}
                              </td>
                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
