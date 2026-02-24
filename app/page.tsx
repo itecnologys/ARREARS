@@ -190,7 +190,7 @@ export default function Home() {
                   type="button"
                   onClick={() => {
                     setSelectedYear(year);
-                    const months = getMonthsForYear(year);
+                    const months = getMonthsForYear(year, allRecords);
                     setSelectedMonth(months[0] ?? "");
                   }}
                   className={[
