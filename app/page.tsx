@@ -549,28 +549,26 @@ function SummaryCard(props: { label: string; value: string }) {
   );
 }
 
-function Th(props: React.PropsWithChildren<{ className?: string }>) {
+function Th({ className, ...props }: React.ComponentProps<"th">) {
   return (
     <th
       className={
         "whitespace-nowrap px-3 py-2 text-left text-xs font-medium uppercase tracking-wide text-zinc-500 " +
-        (props.className ?? "")
+        (className ?? "")
       }
-    >
-      {props.children}
-    </th>
+      {...props}
+    />
   );
 }
 
-function Td(props: React.PropsWithChildren<{ className?: string }>) {
+function Td({ className, ...props }: React.ComponentProps<"td">) {
   return (
     <td
       className={
         "whitespace-nowrap px-3 py-2 text-xs text-zinc-800 " +
-        (props.className ?? "")
+        (className ?? "")
       }
-    >
-      {props.children}
-    </td>
+      {...props}
+    />
   );
 }
