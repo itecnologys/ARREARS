@@ -1,36 +1,29 @@
 
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
-import path from "node:path";
-import fs from "node:fs";
-import * as XLSX from "xlsx";
 import { createClient } from '@supabase/supabase-js';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as XLSX from 'xlsx';
 
-// Configuração do Supabase
+// Usar a chave de serviço (Service Role) para ignorar RLS durante a migração
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Erro: NEXT_PUBLIC_SUPABASE_URL e (SUPABASE_SERVICE_ROLE_KEY ou NEXT_PUBLIC_SUPABASE_ANON_KEY) devem estar definidos no .env.local');
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('Erro: NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY devem estar definidos no .env.local');
   process.exit(1);
 }
 
-console.log(`Conectando ao Supabase em: ${supabaseUrl}`);
-console.log(`Usando chave: ${process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SERVICE_ROLE (Secret)' : 'ANON (Public)'}`);
-
-const supabase = createClient(supabaseUrl, supabaseKey, {
+// Cliente com privilégios de admin (bypass RLS)
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
-    persistSession: false,
     autoRefreshToken: false,
+    persistSession: false
   }
 });
 
-// --- Lógica de Leitura de Arquivos (Copiada de build-yearly-data.ts) ---
-
-const rootDir = path.resolve(__dirname, "..");
-// Ajuste o caminho conforme necessário. No script original era '..', '..', 'RENTARREARS'.
-// Aqui assumimos que a pasta 'PAYMENTS-REPORTS-BY-WEEK' está dentro do projeto atual, pois copiamos ela anteriormente.
-const weeksDir = path.join(rootDir, "PAYMENTS-REPORTS-BY-WEEK");
+const weeksDir = path.join(__dirname, '../PAYMENTS-REPORTS-BY-WEEK');
 
 interface WeekFileInfo {
   year: number;
@@ -82,6 +75,7 @@ function readWeeklyFile(info: WeekFileInfo): RawWeeklyRow[] {
   const result: RawWeeklyRow[] = [];
   if (!rows || rows.length === 0) return result;
 
+  // Find the real header row, e.g. ["", "Type", "T/C", "No.", "Date", "Reference", "A/C", "N/C", "", "Details", "", "Net", "", "Vat", "", "Gross", ...]
   let headerIndex = -1;
   for (let i = 0; i < rows.length; i += 1) {
     const r = rows[i].map((v) => String(v || "").trim().toLowerCase());
@@ -91,170 +85,208 @@ function readWeeklyFile(info: WeekFileInfo): RawWeeklyRow[] {
     }
   }
 
-  if (headerIndex === -1) {
-    // Format B logic (simplified for brevity, assuming same as original)
-    // ... (Copiando lógica complexa do original seria ideal, mas vou simplificar para Format A primeiro se for o caso comum, 
-    // mas o original tinha fallback para Format B. Vou copiar a lógica completa para garantir)
-    
-    let currentAc = "";
-    let currentName = "";
-    let currentContact = "";
-    let transHeaderFound = false;
-    let amountLabelIdx = -1;
-    let paidLabelIdx = -1;
-    let outstandingLabelIdx = -1;
-    let typeIdx = -1;
-    let detailsIdx = -1;
-    let noIdx = -1;
-    let dateIdx = -1;
-    let refIdx = -1;
-    for (let i = 0; i < rows.length; i += 1) {
-      const line = rows[i].map((v) => String(v || "").trim());
-      const lower = line.map((v) => v.toLowerCase());
-      if (lower.includes("a/c:") && lower.includes("name:")) {
-        const acPos = lower.indexOf("a/c:");
-        const namePos = lower.indexOf("name:");
-        currentAc = String(line[acPos + 1] || "").trim();
-        currentName = String(line[namePos + 1] || "").trim();
-        const contactPos = lower.indexOf("contact:");
-        currentContact = contactPos !== -1 ? String(line[contactPos + 1] || "").trim() : "";
-        transHeaderFound = false;
-        amountLabelIdx = -1;
-        typeIdx = -1;
-        detailsIdx = -1;
-        noIdx = -1;
-        dateIdx = -1;
-        refIdx = -1;
-        continue;
-      }
-      if (!transHeaderFound) {
-        if (lower.includes("type")) typeIdx = lower.indexOf("type");
-        if (lower.includes("details")) detailsIdx = lower.indexOf("details");
-        if (lower.includes("no")) noIdx = lower.indexOf("no");
-        if (lower.includes("date")) dateIdx = lower.indexOf("date");
-        if (lower.includes("ref")) refIdx = lower.indexOf("ref");
-        if (lower.includes("amount")) {
-          amountLabelIdx = lower.indexOf("amount");
-          transHeaderFound = true;
+  // Format A: T9 Transaction Listing (2024)
+  if (headerIndex !== -1) {
+    const header = rows[headerIndex].map((v) => String(v || "").trim());
+    const labeledCols = header
+      .map((h, idx) => ({
+        label: String(h || "").trim().toLowerCase(),
+        idx,
+      }))
+      .filter((c) => c.label.length > 0);
+
+    const getVal = (row: (string | number)[], label: string): string => {
+      const col = labeledCols.find((c) => c.label === label);
+      if (!col) return "";
+      return String(row[col.idx] ?? "").trim();
+    };
+
+    for (let i = headerIndex + 1; i < rows.length; i += 1) {
+      const row = rows[i];
+      if (!row || row.length === 0) continue;
+
+      let rawGross = getVal(row, "gross");
+      if (!rawGross) rawGross = getVal(row, "net");
+      
+      const cleaned = String(rawGross ?? "").replace(/[^\d\.\-]/g, "");
+      let gross = Number(cleaned);
+
+      if (!Number.isFinite(gross)) {
+        // Fallback: scan for last numeric
+        for (let j = row.length - 1; j >= 0; j -= 1) {
+          const v = String(row[j] ?? "");
+          const c2 = v.replace(/[^\d\.\-]/g, "");
+          if (!c2) continue;
+          const n = Number(c2);
+          if (Number.isFinite(n)) {
+            gross = n;
+            break;
+          }
         }
-        if (lower.includes("paid")) paidLabelIdx = lower.indexOf("paid");
-        if (lower.includes("outstanding")) outstandingLabelIdx = lower.indexOf("outstanding");
-        continue;
       }
-      if (transHeaderFound) {
-        if (lower.includes("total:")) {
-          transHeaderFound = false;
-          continue;
-        }
-        const hasAny = line.some((v) => v.length > 0);
-        if (!hasAny) continue;
-        
-        const toNum = (s: string) => Number(String(s ?? "").replace(/[^\d\.\-]/g, ""));
-        const getAt = (idx: number) => idx !== -1 ? toNum(line[idx] as string) : NaN;
-        
-        let amt = NaN;
-        const amtCol = getAt(amountLabelIdx);
-        if (Number.isFinite(amtCol) && Math.abs(amtCol) > 0) amt = amtCol;
-        else {
-           const outCol = getAt(outstandingLabelIdx);
-           if (Number.isFinite(outCol) && Math.abs(outCol) > 0) amt = outCol;
-           else {
-             // fallback logic
-             const startScan = detailsIdx !== -1 ? detailsIdx + 1 : 0;
-             for (let j = startScan; j < line.length; j += 1) {
-               const n = toNum(line[j] as string);
-               if (Number.isFinite(n) && Math.abs(n) > 0) { amt = n; break; }
-             }
-             if (!Number.isFinite(amt)) {
-                for (let j = line.length - 1; j >= 0; j -= 1) {
-                  const n = toNum(line[j] as string);
-                  if (Number.isFinite(n)) { amt = n; break; }
-                }
-             }
-           }
-        }
-        if (!Number.isFinite(amt)) continue;
-        const amount = Math.abs(amt);
-        const typeVal = typeIdx !== -1 ? String(line[typeIdx] || "").trim() : "";
-        const detailsVal = detailsIdx !== -1 ? String(line[detailsIdx] || "").trim() : "";
-        if (typeVal.toUpperCase() !== "SA" || detailsVal.toUpperCase() !== "CASH") continue;
-        
-        const roomCode = currentAc || "";
-        const tenantName = currentName || (currentAc ? `AC:${currentAc}` : "");
-        const transactionNo = noIdx !== -1 ? String(line[noIdx] || "").trim() : "";
-        const date = dateIdx !== -1 ? String(line[dateIdx] || "").trim() : "";
-        const reference = refIdx !== -1 ? String(line[refIdx] || "").trim() : "";
-        
-        if (!roomCode && !tenantName) continue;
-        
-        result.push({
-          roomCode,
-          tenantName,
-          amount,
-          type: typeVal,
-          details: detailsVal,
-          transactionNo,
-          date,
-          reference,
-          staffName: currentContact,
-          weekNumber: info.weekNumber,
-        });
-      }
+
+      if (!Number.isFinite(gross)) continue;
+      
+      const amount = Math.abs(gross);
+      const ac = getVal(row, "a/c");
+      const reference = getVal(row, "reference");
+      const typeVal = getVal(row, "type").toUpperCase();
+      const detailsVal = getVal(row, "details").toUpperCase();
+
+      if (typeVal !== "SA" || detailsVal !== "CASH") continue;
+
+      const noVal = getVal(row, "no.");
+      const dateVal = getVal(row, "date");
+
+      const roomCode = ac || "";
+      const tenantName = reference || (ac ? `AC:${ac}` : "");
+
+      if (!roomCode && !tenantName) continue;
+
+      result.push({
+        roomCode,
+        tenantName,
+        amount,
+        type: typeVal,
+        details: detailsVal,
+        transactionNo: noVal,
+        date: dateVal,
+        reference,
+        staffName: "",
+        weekNumber: info.weekNumber,
+      });
     }
     return result;
   }
 
-  // Format A logic
-  const header = rows[headerIndex].map((v) => String(v || "").trim());
-  const labeledCols = header
-    .map((h, idx) => ({ label: String(h || "").trim().toLowerCase(), idx }))
-    .filter((c) => c.label.length > 0);
-  const getVal = (row: (string | number)[], label: string): string => {
-    const col = labeledCols.find((c) => c.label === label);
-    if (!col) return "";
-    return String(row[col.idx] ?? "").trim();
-  };
+  // Format B: Customer transaction blocks (2025/Legacy)
+  let currentAc = "";
+  let currentName = "";
+  let currentContact = "";
+  let transHeaderFound = false;
+  
+  // Indices for Format B
+  let amountLabelIdx = -1;
+  let paidLabelIdx = -1;
+  let outstandingLabelIdx = -1;
+  let typeIdx = -1;
+  let detailsIdx = -1;
+  let noIdx = -1;
+  let dateIdx = -1;
+  let refIdx = -1;
 
-  for (let i = headerIndex + 1; i < rows.length; i += 1) {
-    const row = rows[i];
-    if (!row || row.length === 0) continue;
-    let rawGross = getVal(row, "gross");
-    if (!rawGross) rawGross = getVal(row, "net");
-    let gross = Number(String(rawGross ?? "").replace(/[^\d\.\-]/g, ""));
-    if (!Number.isFinite(gross)) {
-       for (let j = row.length - 1; j >= 0; j -= 1) {
-         const v = String(row[j] ?? "");
-         const cleaned = v.replace(/[^\d\.\-]/g, "");
-         if (!cleaned) continue;
-         const n = Number(cleaned);
-         if (Number.isFinite(n)) { gross = n; break; }
-       }
+  for (let i = 0; i < rows.length; i += 1) {
+    const line = rows[i].map((v) => String(v || "").trim());
+    const lower = line.map((v) => v.toLowerCase());
+
+    if (lower.includes("a/c:") && lower.includes("name:")) {
+      const acPos = lower.indexOf("a/c:");
+      const namePos = lower.indexOf("name:");
+      currentAc = String(line[acPos + 1] || "").trim();
+      currentName = String(line[namePos + 1] || "").trim();
+      
+      const contactPos = lower.indexOf("contact:");
+      currentContact = contactPos !== -1 ? String(line[contactPos + 1] || "").trim() : "";
+      
+      transHeaderFound = false;
+      amountLabelIdx = -1;
+      typeIdx = -1;
+      detailsIdx = -1;
+      noIdx = -1;
+      dateIdx = -1;
+      refIdx = -1;
+      continue;
     }
-    if (!Number.isFinite(gross)) continue;
-    const amount = Math.abs(gross);
-    const ac = getVal(row, "a/c");
-    const reference = getVal(row, "reference");
-    const typeVal = getVal(row, "type").toUpperCase();
-    const detailsVal = getVal(row, "details").toUpperCase();
-    if (typeVal !== "SA" || detailsVal !== "CASH") continue;
-    const noVal = getVal(row, "no.");
-    const dateVal = getVal(row, "date");
-    const roomCode = ac || "";
-    const tenantName = reference || (ac ? `AC:${ac}` : "");
-    if (!roomCode && !tenantName) continue;
-    result.push({
-      roomCode,
-      tenantName,
-      amount,
-      type: typeVal,
-      details: detailsVal,
-      transactionNo: noVal,
-      date: dateVal,
-      reference,
-      staffName: "",
-      weekNumber: info.weekNumber,
-    });
+
+    if (!transHeaderFound) {
+      if (lower.includes("type")) typeIdx = lower.indexOf("type");
+      if (lower.includes("details")) detailsIdx = lower.indexOf("details");
+      if (lower.includes("no")) noIdx = lower.indexOf("no");
+      if (lower.includes("date")) dateIdx = lower.indexOf("date");
+      if (lower.includes("ref")) refIdx = lower.indexOf("ref");
+      
+      if (lower.includes("amount")) {
+        amountLabelIdx = lower.indexOf("amount");
+        transHeaderFound = true;
+      }
+      if (lower.includes("paid")) paidLabelIdx = lower.indexOf("paid");
+      if (lower.includes("outstanding")) outstandingLabelIdx = lower.indexOf("outstanding");
+      continue;
+    }
+
+    if (transHeaderFound) {
+      if (lower.includes("total:")) {
+        transHeaderFound = false;
+        continue;
+      }
+
+      // Skip empty rows
+      if (!line.some((v) => v.length > 0)) continue;
+
+      const toNum = (s: string) => Number(String(s ?? "").replace(/[^\d\.\-]/g, ""));
+      const getAt = (idx: number) => (idx !== -1 ? toNum(line[idx] as string) : NaN);
+
+      let amt = NaN;
+      const amtCol = getAt(amountLabelIdx);
+      if (Number.isFinite(amtCol) && Math.abs(amtCol) > 0) {
+        amt = amtCol;
+      } else {
+        const outCol = getAt(outstandingLabelIdx);
+        if (Number.isFinite(outCol) && Math.abs(outCol) > 0) {
+          amt = outCol;
+        } else {
+            // scan after Details
+            const startScan = detailsIdx !== -1 ? detailsIdx + 1 : 0;
+            for (let j = startScan; j < line.length; j += 1) {
+              const n = toNum(line[j] as string);
+              if (Number.isFinite(n) && Math.abs(n) > 0) {
+                amt = n;
+                break;
+              }
+            }
+            if (!Number.isFinite(amt)) {
+              // final fallback: last numeric
+              for (let j = line.length - 1; j >= 0; j -= 1) {
+                const n = toNum(line[j] as string);
+                if (Number.isFinite(n)) {
+                  amt = n;
+                  break;
+                }
+              }
+            }
+        }
+      }
+
+      if (!Number.isFinite(amt)) continue;
+      
+      const amount = Math.abs(amt);
+      const typeVal = typeIdx !== -1 ? String(line[typeIdx] || "").trim() : "";
+      const detailsVal = detailsIdx !== -1 ? String(line[detailsIdx] || "").trim() : "";
+      
+      // Filter strictly for SA / CASH as requested
+      if (typeVal.toUpperCase() !== "SA" || detailsVal.toUpperCase() !== "CASH") continue;
+
+      const transactionNo = noIdx !== -1 ? String(line[noIdx] || "").trim() : "";
+      const date = dateIdx !== -1 ? String(line[dateIdx] || "").trim() : "";
+      const reference = refIdx !== -1 ? String(line[refIdx] || "").trim() : "";
+
+      if (!currentAc && !currentName) continue;
+
+      result.push({
+        roomCode: currentAc,
+        tenantName: currentName || (currentAc ? `AC:${currentAc}` : ""),
+        amount,
+        type: typeVal,
+        details: detailsVal,
+        transactionNo,
+        date,
+        reference,
+        staffName: currentContact,
+        weekNumber: info.weekNumber,
+      });
+    }
   }
+
   return result;
 }
 
