@@ -33,22 +33,73 @@ function weekToMonthCode(year: number, week: number): string {
   return `${year}-12`;
 }
 
-export async function fetchMonthlyArrearsFromSupabase(): Promise<MonthlyArrearsRecord[]> {
-  // Buscar todos os pagamentos
-  // Nota: Para grandes volumes, idealmente filtraríamos por ano/mês no banco.
-  // Aqui estamos buscando tudo para manter compatibilidade com a lógica anterior de processamento em memória.
-  const { data, error } = await supabase
-    .from('payments')
-    .select('*')
-    .order('year', { ascending: true })
-    .order('week_number', { ascending: true });
+const PAGE_SIZE = 1000;
 
-  if (error) {
-    console.error('Erro ao buscar dados do Supabase:', error);
-    return [];
+async function fetchAllPayments(year?: number): Promise<PaymentRow[]> {
+  let allRows: PaymentRow[] = [];
+  let from = 0;
+  
+  while (true) {
+    let query = supabase
+      .from('payments')
+      .select('*')
+      .range(from, from + PAGE_SIZE - 1)
+      .order('year', { ascending: true })
+      .order('week_number', { ascending: true });
+
+    if (year) {
+      query = query.eq('year', year);
+    }
+
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error fetching payments page:', error);
+      break;
+    }
+    
+    if (!data || data.length === 0) break;
+    
+    allRows = allRows.concat(data as PaymentRow[]);
+    
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+  
+  return allRows;
+}
+
+export async function getAvailableYears(): Promise<number[]> {
+  let allYears: number[] = [];
+  let from = 0;
+  
+  while (true) {
+    const { data, error } = await supabase
+      .from('payments')
+      .select('year')
+      .range(from, from + PAGE_SIZE - 1);
+      
+    if (error) {
+      console.error('Error fetching years:', error);
+      break;
+    }
+
+    if (!data || data.length === 0) break;
+    
+    data.forEach((row: any) => {
+      if (row.year) allYears.push(row.year);
+    });
+
+    if (data.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
   }
 
-  const rows = (data as PaymentRow[]) || [];
+  const uniqueYears = Array.from(new Set(allYears)).sort();
+  return uniqueYears.length > 0 ? uniqueYears : [2024];
+}
+
+export async function fetchMonthlyArrearsFromSupabase(year?: number): Promise<MonthlyArrearsRecord[]> {
+  const rows = await fetchAllPayments(year);
   if (rows.length === 0) return [];
 
   // Reconstruir a lógica de agregação (similar ao build-yearly-data.ts)
@@ -211,14 +262,10 @@ export async function fetchMonthlyArrearsFromSupabase(): Promise<MonthlyArrearsR
   return result;
 }
 
-export async function fetchTransactionsFromSupabase(): Promise<TransactionSaCash[]> {
-    const { data, error } = await supabase
-    .from('payments')
-    .select('*');
-
-    if (error || !data) return [];
-
-    return data.map((r: PaymentRow) => ({
+export async function fetchTransactionsFromSupabase(year?: number): Promise<TransactionSaCash[]> {
+    const rows = await fetchAllPayments(year);
+    
+    return rows.map((r: PaymentRow) => ({
         year: r.year,
         weekNumber: r.week_number,
         periodMonth: weekToMonthCode(r.year, r.week_number),

@@ -8,7 +8,7 @@ import {
 } from "./rent-model";
 // import monthlyArrearsData from "../data/monthly-arrears.json";
 // import transactionsSaCashData from "../data/transactions-sa-cash-agg.json";
-import { fetchMonthlyArrearsFromSupabase, fetchTransactionsFromSupabase } from "./actions";
+import { fetchMonthlyArrearsFromSupabase, fetchTransactionsFromSupabase, getAvailableYears } from "./actions";
 
 // const jsonRecords = (monthlyArrearsData as MonthlyArrearsRecord[]) ?? [];
 // const baseRecords: MonthlyArrearsRecord[] =
@@ -55,6 +55,7 @@ function monthLabel(code: string): string {
     "Oct",
     "Nov",
     "Dec",
+    "Dec",
   ];
   return labels[month - 1] ?? code;
 }
@@ -63,51 +64,68 @@ export default function Home() {
   const [allRecords, setAllRecords] = useState<MonthlyArrearsRecord[]>([]);
   const [allTransactions, setAllTransactions] = useState<TransactionSaCash[]>([]);
   const [loading, setLoading] = useState(true);
+  const [availableYears, setAvailableYears] = useState<number[]>([2024]);
+  const [selectedYear, setSelectedYear] = useState<number>(2024);
+  const [selectedMonth, setSelectedMonth] = useState<string>("");
 
+  // 1. Fetch available years on mount
+  useEffect(() => {
+    async function loadYears() {
+      const years = await getAvailableYears();
+      if (years.length > 0) {
+        setAvailableYears(years);
+        // Default to the latest year usually, or first. Let's stick to first for consistency with old logic
+        // But user probably wants latest data. Let's use latest.
+        // Actually, let's just pick the first one for now to avoid confusion with existing logic.
+        // The previous logic was: if (numberYears.length > 0 && !numberYears.includes(selectedYear)) setSelectedYear(numberYears[0]);
+        // Let's replicate that.
+        if (!years.includes(selectedYear)) {
+            setSelectedYear(years[0]);
+        }
+      }
+    }
+    loadYears();
+  }, []);
+
+  // 2. Fetch data when selectedYear changes
   useEffect(() => {
     async function loadData() {
+        setLoading(true);
         try {
-            const records = await fetchMonthlyArrearsFromSupabase();
-            const transactions = await fetchTransactionsFromSupabase();
+            console.log(`Loading data for year ${selectedYear}...`);
+            const records = await fetchMonthlyArrearsFromSupabase(selectedYear);
+            const transactions = await fetchTransactionsFromSupabase(selectedYear);
             
             if (records.length > 0) {
                 setAllRecords(records);
             } else {
-                setAllRecords(sampleMonthlyArrears); // Fallback se DB vazio
+                setAllRecords([]); // Empty if no records for year
             }
             setAllTransactions(transactions);
         } catch (error) {
             console.error("Failed to load data", error);
-            setAllRecords(sampleMonthlyArrears);
+            setAllRecords([]);
         } finally {
             setLoading(false);
         }
     }
-    loadData();
-  }, []);
-
-  const yearValues = Array.from(
-    new Set(allRecords.map((r) => r.periodMonth.slice(0, 4))),
-  ).sort();
-  const numberYears = yearValues.map((y) => Number(y));
-
-  const [selectedYear, setSelectedYear] = useState<number>(2024);
-  const [selectedMonth, setSelectedMonth] = useState<string>("");
-
-  // Update defaults when data loads
-  useEffect(() => {
-    if (numberYears.length > 0 && !numberYears.includes(selectedYear)) {
-        setSelectedYear(numberYears[0]);
+    if (selectedYear) {
+        loadData();
     }
-  }, [numberYears, selectedYear]);
+  }, [selectedYear]);
 
+  // Update selectedMonth when records change (e.g. year changed)
   useEffect(() => {
      if (selectedYear) {
          const months = getMonthsForYear(selectedYear, allRecords);
-         if (months.length > 0 && !months.includes(selectedMonth)) {
-             setSelectedMonth(months[0]);
-         } else if (months.length > 0 && selectedMonth === "") {
-             setSelectedMonth(months[0]);
+         // If current selectedMonth is not in the new list, pick the first one.
+         // Or if it's empty, pick the first one.
+         if (months.length > 0) {
+            if (!months.includes(selectedMonth) || selectedMonth === "") {
+                setSelectedMonth(months[0]);
+            }
+         } else {
+             setSelectedMonth("");
          }
      }
   }, [selectedYear, allRecords, selectedMonth]);
@@ -187,12 +205,10 @@ export default function Home() {
               onChange={(e) => {
                 const year = Number(e.target.value);
                 setSelectedYear(year);
-                const months = getMonthsForYear(year, allRecords);
-                setSelectedMonth(months[0] ?? "");
               }}
               className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-700 shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900"
             >
-              {numberYears.map((year) => (
+              {availableYears.map((year) => (
                 <option key={year} value={year}>
                   {year}
                 </option>
