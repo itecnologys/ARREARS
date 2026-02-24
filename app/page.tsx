@@ -182,28 +182,22 @@ export default function Home() {
             Select year
           </div>
           <div className="flex flex-wrap gap-2">
-            {numberYears.map((year) => {
-              const isActive = year === selectedYear;
-              return (
-                <button
-                  key={year}
-                  type="button"
-                  onClick={() => {
-                    setSelectedYear(year);
-                    const months = getMonthsForYear(year, allRecords);
-                    setSelectedMonth(months[0] ?? "");
-                  }}
-                  className={[
-                    "rounded-full border px-3 py-1 text-xs transition-colors",
-                    isActive
-                      ? "border-zinc-900 bg-zinc-900 text-white"
-                      : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400",
-                  ].join(" ")}
-                >
+            <select
+              value={selectedYear}
+              onChange={(e) => {
+                const year = Number(e.target.value);
+                setSelectedYear(year);
+                const months = getMonthsForYear(year, allRecords);
+                setSelectedMonth(months[0] ?? "");
+              }}
+              className="rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-700 shadow-sm focus:border-zinc-900 focus:outline-none focus:ring-1 focus:ring-zinc-900"
+            >
+              {numberYears.map((year) => (
+                <option key={year} value={year}>
                   {year}
-                </button>
-              );
-            })}
+                </option>
+              ))}
+            </select>
           </div>
         </section>
 
