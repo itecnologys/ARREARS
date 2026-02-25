@@ -392,14 +392,24 @@ export async function fetchMonthlyArrearsFromSupabase(year?: number): Promise<Mo
 }
 
 export async function fetchTransactionsFromSupabase(year?: number): Promise<TransactionSaCash[]> {
+    console.log("Fetching transactions and tenants...");
     const rows = await fetchAllPayments(year);
     const dbTenants = await fetchTenants();
+    console.log(`Loaded ${rows.length} transactions and ${dbTenants.length} tenants.`);
+
+    if (dbTenants.length > 0) {
+        console.log("Sample tenant Sage ID:", dbTenants[0].sageId, typeof dbTenants[0].sageId);
+    }
+    if (rows.length > 0) {
+        console.log("Sample payment Room Code:", rows[0].room_code, typeof rows[0].room_code);
+    }
 
     const getTenantInfo = (name: string, room: string) => {
         // Priority: Check if room matches a SageID in DB tenants (since Payments use RoomCode field for SageID)
         const potentialSageId = room?.toString().trim();
         if (potentialSageId) {
-            const dbTenantBySage = dbTenants.find(t => t.sageId === potentialSageId);
+            // Force string comparison and trim on both sides to be safe
+            const dbTenantBySage = dbTenants.find(t => String(t.sageId).trim() === potentialSageId);
             if (dbTenantBySage) return dbTenantBySage;
         }
 
@@ -414,12 +424,17 @@ export async function fetchTransactionsFromSupabase(year?: number): Promise<Tran
     return rows.map((r: PaymentRow) => {
         const tenant = getTenantInfo(r.tenant_name, r.room_code);
 
+        // Debug log for a specific case if needed
+        if (r.room_code === '190' && !tenant) {
+            console.warn("Failed to find tenant for Sage ID 190 (Robert Cam)");
+        }
+
         return {
             year: r.year,
             weekNumber: r.week_number,
             periodMonth: weekToMonthCode(r.year, r.week_number),
             sageId: tenant?.sageId || r.room_code,
-            roomCode: tenant?.roomCode || r.room_code, // Now this will be A05 instead of 190
+            roomCode: tenant?.roomCode || r.room_code, 
             tenantName: tenant?.tenantName || r.tenant_name,
             transactionNo: r.transaction_no,
             date: r.transaction_date,
