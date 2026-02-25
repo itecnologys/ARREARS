@@ -46,6 +46,7 @@ export interface TransactionSaCash {
   year: number;
   weekNumber: number;
   periodMonth: string;
+  sageId?: string; // Added Sage ID
   roomCode: string;
   tenantName: string;
   transactionNo: string;

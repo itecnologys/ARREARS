@@ -393,20 +393,42 @@ export async function fetchMonthlyArrearsFromSupabase(year?: number): Promise<Mo
 
 export async function fetchTransactionsFromSupabase(year?: number): Promise<TransactionSaCash[]> {
     const rows = await fetchAllPayments(year);
+    const dbTenants = await fetchTenants();
+
+    const getTenantInfo = (name: string, room: string) => {
+        // Priority: Check if room matches a SageID in DB tenants (since Payments use RoomCode field for SageID)
+        const potentialSageId = room?.toString().trim();
+        if (potentialSageId) {
+            const dbTenantBySage = dbTenants.find(t => t.sageId === potentialSageId);
+            if (dbTenantBySage) return dbTenantBySage;
+        }
+
+        // Secondary: Lookup by Name
+        const norm = normalizeName(name);
+        const dbTenantByName = dbTenants.find(t => normalizeName(t.tenantName) === norm);
+        if (dbTenantByName) return dbTenantByName;
+        
+        return null;
+    };
     
-    return rows.map((r: PaymentRow) => ({
-        year: r.year,
-        weekNumber: r.week_number,
-        periodMonth: weekToMonthCode(r.year, r.week_number),
-        roomCode: r.room_code,
-        tenantName: r.tenant_name,
-        transactionNo: r.transaction_no,
-        date: r.transaction_date,
-        reference: r.reference,
-        type: r.transaction_type,
-        details: r.details,
-        amount: r.amount
-    }));
+    return rows.map((r: PaymentRow) => {
+        const tenant = getTenantInfo(r.tenant_name, r.room_code);
+
+        return {
+            year: r.year,
+            weekNumber: r.week_number,
+            periodMonth: weekToMonthCode(r.year, r.week_number),
+            sageId: tenant?.sageId || r.room_code,
+            roomCode: tenant?.roomCode || r.room_code, // Now this will be A05 instead of 190
+            tenantName: tenant?.tenantName || r.tenant_name,
+            transactionNo: r.transaction_no,
+            date: r.transaction_date,
+            reference: r.reference,
+            type: r.transaction_type,
+            details: r.details,
+            amount: r.amount
+        };
+    });
 }
 
 export async function fetchTenants(): Promise<Tenant[]> {

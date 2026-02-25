@@ -119,6 +119,7 @@ export default function PaymentsPage() {
                     <th className="px-6 py-4">Date</th>
                     <th className="px-6 py-4">Transaction No</th>
                     <th className="px-6 py-4">Tenant</th>
+                    <th className="px-6 py-4">Sage ID</th>
                     <th className="px-6 py-4">Room</th>
                     <th className="px-6 py-4">Type</th>
                     <th className="px-6 py-4">Reference</th>
@@ -149,6 +150,9 @@ export default function PaymentsPage() {
                         </td>
                         <td className="px-6 py-4 text-zinc-900 font-medium">
                           {t.tenantName}
+                        </td>
+                        <td className="px-6 py-4 text-zinc-600 font-mono text-xs">
+                          {t.sageId}
                         </td>
                          <td className="px-6 py-4 text-zinc-600">
                           <span className="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-600 ring-1 ring-inset ring-zinc-500/10">
