@@ -437,8 +437,11 @@ function buildYearData(year: number): MonthlyArrearsRecord[] {
       carriedOverFromPreviousMonthAmount: 0,
       monthTotalPaidAmount,
       monthArrearsAmount,
+      monthSurplusAmount: 0, // Add missing property
+      previousBalanceAmount: 0, // Add missing property
       yearArrearsAmount: 0, // will fill in a second pass
       currentArrearsAmount,
+      currentSurplusAmount: 0, // Add missing property
       periodMonth: key.monthCode,
       snapshotDate: `${key.monthCode}-01`,
       audit: {
