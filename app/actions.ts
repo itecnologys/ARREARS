@@ -193,14 +193,14 @@ export async function fetchMonthlyArrearsFromSupabase(year?: number): Promise<Mo
 
         // Priority 1: Lookup by SageID in DB tenants (if provided explicitly)
         if (sageIdFromRow) {
-            const dbTenant = dbTenants.find(t => t.sageId === sageIdFromRow);
+            const dbTenant = dbTenants.find(t => String(t.sageId).trim() === sageIdFromRow);
             if (dbTenant) return mapDbTenant(dbTenant);
         }
 
         // Priority 2: Check if room matches a SageID in DB tenants (Fix for legacy data where room_code stored sage_id)
         const potentialSageId = room?.toString().trim();
         if (potentialSageId) {
-            const dbTenantByRoom = dbTenants.find(t => t.sageId === potentialSageId);
+            const dbTenantByRoom = dbTenants.find(t => String(t.sageId).trim() === potentialSageId);
             if (dbTenantByRoom) return mapDbTenant(dbTenantByRoom);
         }
 
