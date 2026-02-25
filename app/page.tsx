@@ -242,11 +242,12 @@ export default function Home() {
           <table className="min-w-full divide-y divide-zinc-200">
              <thead className="bg-zinc-50">
                <tr>
-                 <th scope="col" className="px-6 py-3 text-left">
+                 <Th className="w-10">
                    <input type="checkbox" className="rounded border-zinc-300 text-blue-600 focus:ring-blue-500" />
-                 </th>
+                 </Th>
                  <Th>Tenant</Th>
-                 <Th>Room / Unit</Th>
+                 <Th>Sage ID</Th>
+                 <Th>Room</Th>
                  <Th>Status</Th>
                  <Th className="text-right">Rent Amount</Th>
                  <Th className="text-right">Prev Balance</Th>
@@ -282,6 +283,9 @@ export default function Home() {
                                       <div className="text-xs text-zinc-500">{r.staffName || 'No Agent'}</div>
                                    </div>
                                 </div>
+                             </td>
+                             <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-600 font-mono text-xs">
+                                {r.sageAccountId}
                              </td>
                              <td className="px-6 py-4 whitespace-nowrap text-sm text-zinc-600">
                                 {r.roomCode}

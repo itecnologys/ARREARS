@@ -181,7 +181,7 @@ export default function TenantsPage() {
                   <tr>
                     <th className="px-6 py-4">Tenant Name</th>
                     <th className="px-6 py-4">Sage ID</th>
-                    <th className="px-6 py-4">Room</th>
+                    <th className="px-6 py-4">Room Code</th>
                     <th className="px-6 py-4">Weekly Rent</th>
                     <th className="px-6 py-4">Status</th>
                     <th className="px-6 py-4">Assigned Staff</th>
@@ -220,7 +220,7 @@ export default function TenantsPage() {
                           {t.sageId}
                         </td>
                         <td className="px-6 py-4 text-zinc-600">
-                          <span className="inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-600 ring-1 ring-inset ring-zinc-500/10">
+                          <span className="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
                             {t.roomCode}
                           </span>
                         </td>

@@ -173,6 +173,7 @@ export default function ReportsPage() {
                             <thead>
                                 <tr className="text-zinc-500 border-b border-zinc-100">
                                     <th className="pb-2 font-medium">Tenant</th>
+                                    <th className="pb-2 font-medium">Sage ID</th>
                                     <th className="pb-2 font-medium">Room</th>
                                     <th className="pb-2 font-medium text-right">Amount</th>
                                 </tr>
@@ -181,6 +182,7 @@ export default function ReportsPage() {
                                 {stats.topDebtors.map((r, idx) => (
                                     <tr key={idx}>
                                         <td className="py-3 text-zinc-900">{r.tenantName}</td>
+                                        <td className="py-3 text-zinc-600 font-mono text-xs">{r.sageAccountId}</td>
                                         <td className="py-3 text-zinc-600">{r.roomCode}</td>
                                         <td className="py-3 text-right font-medium text-red-600">
                                             €{(r.monthArrearsAmount + r.yearArrearsAmount).toFixed(2)}
