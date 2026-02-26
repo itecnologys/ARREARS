@@ -1,0 +1,646 @@
+[
+  {
+    "roomCode": "A03",
+    "sageId": "350",
+    "staff": "Sharon",
+    "name": "Louise W",
+    "weeklyRent": 0
+  },
+  {
+    "roomCode": "A04",
+    "sageId": "40",
+    "staff": "Kathleen McC",
+    "name": "Heather C",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "A05",
+    "sageId": "190",
+    "staff": "No one",
+    "name": "Robert Cam",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "A06",
+    "sageId": "463",
+    "staff": "Kathleen McC",
+    "name": "Anna M",
+    "weeklyRent": 35
+  },
+  {
+    "roomCode": "A07",
+    "sageId": "477",
+    "staff": "Sharon",
+    "name": "Derek G",
+    "weeklyRent": 0
+  },
+  {
+    "roomCode": "A08",
+    "sageId": "24",
+    "staff": "Brian F.",
+    "name": "Dermot F",
+    "weeklyRent": 65
+  },
+  {
+    "roomCode": "A09",
+    "sageId": "379",
+    "staff": "No one",
+    "name": "Labri D",
+    "weeklyRent": 0
+  },
+  {
+    "roomCode": "A10",
+    "sageId": "18",
+    "staff": "Brian F.",
+    "name": "Christy B",
+    "weeklyRent": 65
+  },
+  {
+    "roomCode": "A11",
+    "sageId": "479",
+    "staff": "No one",
+    "name": "Seamus O'D",
+    "weeklyRent": 100
+  },
+  {
+    "roomCode": "A12",
+    "sageId": "381",
+    "staff": "Sharon",
+    "name": "Patricia M",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "A13",
+    "sageId": "282",
+    "staff": "Mark T.",
+    "name": "Patrick W",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "A14",
+    "sageId": "447",
+    "staff": "Kathleen McC",
+    "name": "Michael A",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "A15",
+    "sageId": "63",
+    "staff": "Anthony H.",
+    "name": "Martin H",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "A16",
+    "sageId": "451",
+    "staff": "Anthony H.",
+    "name": "Joseph R",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "A17",
+    "sageId": "45",
+    "staff": "Anthony H.",
+    "name": "James C",
+    "weeklyRent": 35
+  },
+  {
+    "roomCode": "A18",
+    "sageId": "435",
+    "staff": "Jason R.",
+    "name": "Gavin M",
+    "weeklyRent": 35
+  },
+  {
+    "roomCode": "A19",
+    "sageId": "48",
+    "staff": "No one",
+    "name": "James K",
+    "weeklyRent": 0
+  },
+  {
+    "roomCode": "A24",
+    "sageId": "19",
+    "staff": "No one",
+    "name": "Dan O’L",
+    "weeklyRent": 0
+  },
+  {
+    "roomCode": "A25",
+    "sageId": "4221",
+    "staff": "NEW",
+    "name": "Mapule Uw.",
+    "weeklyRent": 35
+  },
+  {
+    "roomCode": "A27",
+    "sageId": "300",
+    "staff": "No one",
+    "name": "Ahmed I",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "A28",
+    "sageId": "471",
+    "staff": "No one",
+    "name": "Wiseman N",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "A29",
+    "sageId": "472",
+    "staff": "Kathleen McC",
+    "name": "Brian W",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "A30",
+    "sageId": "450",
+    "staff": "No one",
+    "name": "John F",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "A31",
+    "sageId": "4217",
+    "staff": "Kathleen McC",
+    "name": "Annie McD",
+    "weeklyRent": 35
+  },
+  {
+    "roomCode": "A32",
+    "sageId": "462",
+    "staff": "No one",
+    "name": "Yves N.",
+    "weeklyRent": 45
+  },
+  {
+    "roomCode": "A33",
+    "sageId": "465",
+    "staff": "Kathleen McC",
+    "name": "Noel M.",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "A34",
+    "sageId": "466",
+    "staff": "Kathleen McC",
+    "name": "Neil M.",
+    "weeklyRent": 80
+  },
+  {
+    "roomCode": "A35",
+    "sageId": "305",
+    "staff": "Brian F.",
+    "name": "Devin R",
+    "weeklyRent": 0
+  },
+  {
+    "roomCode": "A36",
+    "sageId": "433",
+    "staff": "Brian F.",
+    "name": "Thomas O’R",
+    "weeklyRent": 35
+  },
+  {
+    "roomCode": "A37",
+    "sageId": "428",
+    "staff": "Kathleen McC",
+    "name": "Oscar M",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "A38",
+    "sageId": "482",
+    "staff": "",
+    "name": "Jason Bry",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "A39",
+    "sageId": "452",
+    "staff": "Sharon",
+    "name": "Bernadette G",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "A40",
+    "sageId": "414",
+    "staff": "No one",
+    "name": "Patricia D",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "A41",
+    "sageId": "355",
+    "staff": "Anthony H.",
+    "name": "Wayne W",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "A42",
+    "sageId": "454",
+    "staff": "Anthony H.",
+    "name": "Thomas T",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "A43",
+    "sageId": "163",
+    "staff": "Mark T.",
+    "name": "Karim.M",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "A44",
+    "sageId": "438",
+    "staff": "No one",
+    "name": "Prince N",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "A45",
+    "sageId": "461",
+    "staff": "Anthony H.",
+    "name": "Terrence W.",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "B01",
+    "sageId": "476",
+    "staff": "No one",
+    "name": "Brian R.",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B02",
+    "sageId": "420",
+    "staff": "Paul M.",
+    "name": "Joseph L",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B03",
+    "sageId": "10",
+    "staff": "Brian F.",
+    "name": "Brendan M",
+    "weeklyRent": 91
+  },
+  {
+    "roomCode": "B04",
+    "sageId": "319",
+    "staff": "Jason R.",
+    "name": "Paco H",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B05",
+    "sageId": "473",
+    "staff": "No one",
+    "name": "Sekele D.",
+    "weeklyRent": 0
+  },
+  {
+    "roomCode": "B06",
+    "sageId": "445",
+    "staff": "No one",
+    "name": "Edward D",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B07",
+    "sageId": "394",
+    "staff": "Anthony H.",
+    "name": "Mark H",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B09",
+    "sageId": "439",
+    "staff": "Paul M.",
+    "name": "Nathan B",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B10",
+    "sageId": "453",
+    "staff": "Sharon",
+    "name": "Lorraine R",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B11",
+    "sageId": "460",
+    "staff": "Kathleen McC",
+    "name": "Tanya McC",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B12",
+    "sageId": "419",
+    "staff": "No one",
+    "name": "Marcin S",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B13",
+    "sageId": "425",
+    "staff": "Mark T.",
+    "name": "Samantha O’",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B14",
+    "sageId": "416",
+    "staff": "Mark T.",
+    "name": "Brian W",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B15",
+    "sageId": "335",
+    "staff": "Jason R.",
+    "name": "Patrick Mapl",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "B16",
+    "sageId": "342",
+    "staff": "Mark T.",
+    "name": "William P",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "C17",
+    "sageId": "334",
+    "staff": "Paul M.",
+    "name": "Brian E",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "C18",
+    "sageId": "371",
+    "staff": "No one",
+    "name": "Mark P.",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "C19",
+    "sageId": "39",
+    "staff": "Kathleen McC",
+    "name": "Hazel McD",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "C20",
+    "sageId": "216",
+    "staff": "Mark T.",
+    "name": "Liz N.",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "C21",
+    "sageId": "405",
+    "staff": "Paul M.",
+    "name": "Johnny M",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "C22",
+    "sageId": "470",
+    "staff": "Kathleen McC",
+    "name": "Patrick C",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "C23",
+    "sageId": "223",
+    "staff": "Sharon",
+    "name": "Mary F",
+    "weeklyRent": 0
+  },
+  {
+    "roomCode": "C25",
+    "sageId": "338",
+    "staff": "Anthony H.",
+    "name": "Constantin L",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "C26",
+    "sageId": "324",
+    "staff": "Mark T.",
+    "name": "John C",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "C27",
+    "sageId": "4222",
+    "staff": "Paul M.",
+    "name": "Anthony Cor",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "C28",
+    "sageId": "4214",
+    "staff": "Paul M.",
+    "name": "Robert L",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D29",
+    "sageId": "157",
+    "staff": "Mark T.",
+    "name": "Brian C",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D30",
+    "sageId": "367",
+    "staff": "Sharon",
+    "name": "Theresa M",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D31",
+    "sageId": "468",
+    "staff": "Kathleen McC",
+    "name": "Salvatori  S.",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D32",
+    "sageId": "427",
+    "staff": "Kathleen McC",
+    "name": "Fiona R",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D33",
+    "sageId": "467",
+    "staff": "No one",
+    "name": "Richard A.",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D34",
+    "sageId": "333",
+    "staff": "Paul M.",
+    "name": "Marcus K",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D36",
+    "sageId": "480",
+    "staff": "Paul M.",
+    "name": "Christopher C.",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D37",
+    "sageId": "459",
+    "staff": "Anthony H.",
+    "name": "Patrick Murp",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D39",
+    "sageId": "100",
+    "staff": "Brian F.",
+    "name": "Anthony M",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D40",
+    "sageId": "92",
+    "staff": "Paul M.",
+    "name": "Thomas G",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D41",
+    "sageId": "475",
+    "staff": "Kathleen McC",
+    "name": "Alexander F",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "D42",
+    "sageId": "168",
+    "staff": "Jason R.",
+    "name": "Sean H",
+    "weeklyRent": 0
+  },
+  {
+    "roomCode": "D43",
+    "sageId": "272",
+    "staff": "Mark T.",
+    "name": "Patrick McN",
+    "weeklyRent": 91
+  },
+  {
+    "roomCode": "D44",
+    "sageId": "4224",
+    "staff": "Mark T.",
+    "name": "Paul J M",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D45",
+    "sageId": "340",
+    "staff": "Mark T.",
+    "name": "Bernard W",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D47",
+    "sageId": "464",
+    "staff": "No one",
+    "name": "Niall K.",
+    "weeklyRent": 65
+  },
+  {
+    "roomCode": "D48",
+    "sageId": "437",
+    "staff": "No one",
+    "name": "Peter S",
+    "weeklyRent": 90
+  },
+  {
+    "roomCode": "D50",
+    "sageId": "478",
+    "staff": "Paul M.",
+    "name": "Anthony Cas",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D51",
+    "sageId": "60",
+    "staff": "No one",
+    "name": "Linda W",
+    "weeklyRent": 91
+  },
+  {
+    "roomCode": "D52",
+    "sageId": "392",
+    "staff": "Brian F.",
+    "name": "Joseph M",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D53",
+    "sageId": "483",
+    "staff": "Mark T.",
+    "name": "Mubshar H",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D54",
+    "sageId": "313",
+    "staff": "Sharon",
+    "name": "Fainche C",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D55",
+    "sageId": "247",
+    "staff": "Kathleen McC",
+    "name": "Claire R",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D56",
+    "sageId": "457",
+    "staff": "Paul M.",
+    "name": "Amir G.",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D57",
+    "sageId": "417",
+    "staff": "Mark T.",
+    "name": "James McD",
+    "weeklyRent": 85
+  },
+  {
+    "roomCode": "D58",
+    "sageId": "64",
+    "staff": "No one",
+    "name": "Martina H",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D59",
+    "sageId": "411",
+    "staff": "Mark T.",
+    "name": "John J",
+    "weeklyRent": 41
+  },
+  {
+    "roomCode": "D60",
+    "sageId": "141",
+    "staff": "Anthony H.",
+    "name": "James F",
+    "weeklyRent": 41
+  }
+]

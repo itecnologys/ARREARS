@@ -9,7 +9,9 @@ import {
   Settings, 
   PieChart, 
   CreditCard,
-  Bell
+  Bell,
+  Upload,
+  Database
 } from 'lucide-react';
 
 export function Sidebar() {
@@ -71,6 +73,18 @@ export function Sidebar() {
           System
         </div>
         <ul className="mt-2 space-y-1">
+          <li>
+            <Link href="/upload" className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive('/upload')}`}>
+              <Upload size={18} />
+              Data Import
+            </Link>
+          </li>
+          <li>
+            <Link href="/settings/mapping" className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive('/settings/mapping')}`}>
+              <Database size={18} />
+              Data Mapping
+            </Link>
+          </li>
           <li>
             <Link href="/settings" className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive('/settings')}`}>
               <Settings size={18} />

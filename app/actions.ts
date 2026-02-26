@@ -451,8 +451,8 @@ export async function fetchTenants(): Promise<Tenant[]> {
     .from('tenants')
     .select(`
       *,
-      absentPeriods:tenant_absences(*),
-      rentHistory:tenant_rent_history(*)
+      absentPeriods:tenant_absences(*)
+      
     `)
     .order('tenant_name');
 
@@ -530,7 +530,8 @@ export async function createTenant(tenant: Omit<Tenant, 'id'>) {
   }
 
   if (historyToInsert.length > 0) {
-      await supabase.from('tenant_rent_history').insert(historyToInsert);
+      const { error: histError } = await supabase.from('tenant_rent_history').insert(historyToInsert);
+      if (histError) console.error('Error inserting rent history (table may be missing):', histError);
   }
 
   if (tenant.absentPeriods && tenant.absentPeriods.length > 0) {
@@ -603,31 +604,35 @@ export async function updateTenant(tenant: Tenant) {
   }
 
   // 3. Handle Rent History
-  const { data: existingHistory } = await supabase
+  const { data: existingHistory, error: historyError } = await supabase
       .from('tenant_rent_history')
       .select('id')
       .eq('tenant_id', tenant.id);
+  
+  if (historyError) {
+      console.error('Error fetching rent history (table may be missing):', historyError);
+  } else {
+      const incomingHistoryIds = tenant.rentHistory?.map(h => h.id).filter(Boolean) || [];
+      const historyToDelete = existingHistory?.filter(h => !incomingHistoryIds.includes(h.id)).map(h => h.id) || [];
 
-  const incomingHistoryIds = tenant.rentHistory?.map(h => h.id).filter(Boolean) || [];
-  const historyToDelete = existingHistory?.filter(h => !incomingHistoryIds.includes(h.id)).map(h => h.id) || [];
+      if (historyToDelete.length > 0) {
+          await supabase.from('tenant_rent_history').delete().in('id', historyToDelete);
+      }
 
-  if (historyToDelete.length > 0) {
-      await supabase.from('tenant_rent_history').delete().in('id', historyToDelete);
-  }
+      if (tenant.rentHistory && tenant.rentHistory.length > 0) {
+          const historyToUpsert = tenant.rentHistory.map(h => ({
+              id: h.id,
+              tenant_id: tenant.id,
+              weekly_rent: h.weeklyRent,
+              effective_date: h.effectiveDate
+          }));
 
-  if (tenant.rentHistory && tenant.rentHistory.length > 0) {
-       const historyToUpsert = tenant.rentHistory.map(h => ({
-          id: h.id,
-          tenant_id: tenant.id,
-          weekly_rent: h.weeklyRent,
-          effective_date: h.effectiveDate
-      }));
+          const newHistory = historyToUpsert.filter(h => !h.id);
+          const existingHistoryToUpdate = historyToUpsert.filter(h => h.id);
 
-      const newHistory = historyToUpsert.filter(h => !h.id);
-      const existingHistoryToUpdate = historyToUpsert.filter(h => h.id);
-
-      if (newHistory.length > 0) await supabase.from('tenant_rent_history').insert(newHistory);
-      if (existingHistoryToUpdate.length > 0) await supabase.from('tenant_rent_history').upsert(existingHistoryToUpdate);
+          if (newHistory.length > 0) await supabase.from('tenant_rent_history').insert(newHistory);
+          if (existingHistoryToUpdate.length > 0) await supabase.from('tenant_rent_history').upsert(existingHistoryToUpdate);
+      }
   }
 }
 
